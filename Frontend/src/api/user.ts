@@ -32,7 +32,7 @@ export const getAllUsers = async () => {
 
 export const blockUser = async (userId: string) => {
   try {
-    const response = await axios.patch(`http://localhost:5000/api/auth/users/${userId}/block`);
+    const response = await axios.patch(`https://wavenet-solutions-pvt-ltd.onrender.com/api/auth/users/${userId}/block`);
     return response.data;
   } catch (error) {
     throw error;
@@ -41,7 +41,7 @@ export const blockUser = async (userId: string) => {
 
 export const deleteUser = async (userId: string) => {
   try {
-    const response = await axios.delete(`http://localhost:5000/api/auth/users/${userId}`);
+    const response = await axios.delete(`https://wavenet-solutions-pvt-ltd.onrender.com/api/auth/users/${userId}`);
     return response.data;
   } catch (error) {
     throw error;

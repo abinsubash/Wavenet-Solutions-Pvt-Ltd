@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = "http://localhost:5000/api";
+const API_URL = "https://wavenet-solutions-pvt-ltd.onrender.com/api";
 
 const api = axios.create({
   baseURL: API_URL,
@@ -65,7 +65,7 @@ interface LoginCredentials {
 
 export const loginUser = async (credentials: LoginCredentials) => {
   try {
-    const response = await axios.post('http://localhost:5000/api/auth/login', credentials);
+    const response = await axios.post('https://wavenet-solutions-pvt-ltd.onrender.com/api/auth/login', credentials);
     return response.data;
   } catch (error) {
     if (axios.isAxiosError(error)) {
@@ -80,7 +80,7 @@ export const loginUser = async (credentials: LoginCredentials) => {
 
 export const getAllUsers = async () => {
   try {
-    const response = await axios.get('http://localhost:5000/api/auth/users');
+    const response = await axios.get('https://wavenet-solutions-pvt-ltd.onrender.com/api/auth/users');
     return response.data;
   } catch (error) {
     if (axios.isAxiosError(error)) {
@@ -115,7 +115,7 @@ export const createAuthenticatedRequest = () => {
   console.log('Refresh Token:', refreshToken);
 
   return axios.create({
-    baseURL: 'http://localhost:5000/api',
+    baseURL: 'https://wavenet-solutions-pvt-ltd.onrender.com/api',
     headers: {
       'Authorization': `Bearer ${token}`,
       'X-Refresh-Token': refreshToken,

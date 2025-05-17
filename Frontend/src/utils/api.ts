@@ -5,7 +5,7 @@ export const createAuthenticatedRequest = () => {
   const refreshToken = localStorage.getItem('refreshToken');
 
   return axios.create({
-    baseURL: 'http://localhost:5000/api',
+    baseURL: 'https://wavenet-solutions-pvt-ltd.onrender.com/api',
     withCredentials: true, // Add this line
     headers: {
       'Authorization': `Bearer ${token}`,
