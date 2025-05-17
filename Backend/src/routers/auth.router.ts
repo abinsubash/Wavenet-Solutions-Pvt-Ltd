@@ -46,6 +46,7 @@ router.patch(
   validate(updateRoleSchema),
   authController.updateUserRole
 );
+router.get('/unit-manager/:id', verifyJWT, authController.getUnitManagerCreatedUsers);
 router.delete("/auth/users/:userId", authController.deleteUser);
 router.get('/users/getAllUnitManager', verifyJWT, authController.getAllUnitManagers);
 router.post('/unit-manager/addToGroup/:id',verifyJWT,authController.addUnitManagerToGroup)

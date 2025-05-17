@@ -250,20 +250,11 @@ export class AuthController {
     next: NextFunction
   ): Promise<void> => {
     try {
-      const currentUser = (req as AuthRequest).user;
-
+      const currentUser = req.params
       if (!currentUser) {
         res.status(401).json({
           success: false,
           message: "Unauthorized access",
-        });
-        return;
-      }
-
-      if (currentUser.role !== "unitmanager") {
-        res.status(403).json({
-          success: false,
-          message: "Only unit managers can access this endpoint",
         });
         return;
       }
@@ -298,7 +289,7 @@ export class AuthController {
         return;
       }
 
-      const admins = await this.authService.getAllAdmins();
+      const admins = await this.authService.getAllAdmins(currentUser.id);
 
       res.status(200).json({
         success: true,
@@ -404,8 +395,17 @@ export class AuthController {
     next: NextFunction
   ): Promise<void> => {
     try {
-      const unitManagers = await this.authService.getAllUnitManagers();
-      console.log("pooda myre");
+    const currentUser = (req as AuthRequest).user;
+
+      if (!currentUser) {
+        res.status(401).json({
+          success: false,
+          message: "Unauthorized access",
+        });
+        return;
+      }
+
+      const unitManagers = await this.authService.getAllUnitManagers(currentUser.id);
       res.status(200).json({
         success: true,
         data: unitManagers,

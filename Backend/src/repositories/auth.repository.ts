@@ -103,20 +103,53 @@ export class AuthRepository {
     }
   }
 
-  async findUsersByCreator(creatorId: string, role: UserRole) {
-    return await UserModel.find({ 
-      createdBy: creatorId,
-      role: role 
-    }).sort({ createdAt: -1 });
+  async findUsersByCreator(creatorId: string, ) {
+    try {
+      console.log('This is user datashowing',creatorId)
+      const users = await UserModel.find({ 
+        createdBy: new Types.ObjectId(creatorId),
+      })
+      .select('-password')
+      .sort({ createdAt: -1 });
+
+      console.log('Found users:', users); // For debugging
+
+      if (!users.length) {
+        console.log(`No users found for creator ${creatorId} with role user`);
+        return [];
+      }
+
+      return users;
+    } catch (error) {
+      console.error('Error in findUsersByCreator:', error);
+      throw error;
+    }
   }
 
-  async getAllAdmins() {
+  async getAllAdmins(currentUserId: string) {
     try {
+      // First get the current user to access their groupedWith array
+      const currentUser = await UserModel.findById(currentUserId);
+      
+      if (!currentUser) {
+        throw new Error('Current user not found');
+      }
+
+      // Get all non-blocked admins
       const admins = await UserModel.find({ 
         role: 'admin',
-        isBlocked: false 
+        isBlocked: false,
+        _id: { $ne: currentUserId }
       }).select('-password');
-      return admins.map(admin => admin.toObject());
+
+      // Filter out admins who are already in the user's groupedWith array
+      const filteredAdmins = admins.filter(admin => 
+        !currentUser.groupedWith?.some(groupedId => 
+          groupedId.toString() === (admin._id as Types.ObjectId).toString()
+        )
+      );
+
+      return filteredAdmins.map(admin => admin.toObject());
     } catch (error) {
       throw error;
     }
@@ -168,15 +201,30 @@ export class AuthRepository {
     }
   }
 
-  async getAllUnitManagers() {
+  async getAllUnitManagers(currentUserId: string) {
     try {
-      const unitManagers =await UserModel.find({ 
+      // First get the current user to access their groupedWith array
+      const currentUser = await UserModel.findById(currentUserId);
+      
+      if (!currentUser) {
+        throw new Error('Current user not found');
+      }
+
+      // Get all non-blocked unit managers
+      const unitManagers = await UserModel.find({ 
         role: 'unitManager',
-        isBlocked: false 
+        isBlocked: false,
+        _id: { $ne: currentUserId }
       }).select('-password');
-      console.log('kittineee')
-      console.log(unitManagers)
-      return unitManagers;
+
+      // Filter out unit managers who are already in the user's groupedWith array
+      const filteredUnitManagers = unitManagers.filter(unitManager => 
+        !currentUser.groupedWith?.some(groupedId => 
+          groupedId.toString() === (unitManager._id as Types.ObjectId).toString()
+        )
+      );
+
+      return filteredUnitManagers.map(unitManager => unitManager.toObject());
     } catch (error) {
       throw error;
     }
@@ -191,6 +239,20 @@ export class AuthRepository {
       console.log('this is usersBYkkkkkkkkkkkkkkkkk',users)
       return users;
 
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async getUnitManagerCreatedUsers(unitManagerId: string) {
+    try {
+      const users = await UserModel.find({
+        createdBy: new Types.ObjectId(unitManagerId),
+        isDeleted: false
+      }).select('-password')
+        .populate('createdBy', 'username email role');
+      
+      return users;
     } catch (error) {
       throw error;
     }

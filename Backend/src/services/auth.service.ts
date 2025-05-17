@@ -5,6 +5,7 @@ import createHttpError from "http-errors";
 import bcrypt from "bcryptjs";
 import { IUser, UserRole, AdminResponse } from '../types/user.types';
 import { Types, Document } from 'mongoose';
+import { string } from "zod";
 
 export class AuthService {
   constructor(private authRepository: AuthRepository) {}
@@ -155,10 +156,24 @@ export class AuthService {
   // Add method to get users created by unit manager
   async getAllUnitManagerCreated(unitManagerId: string) {
     try {
-      const users = await this.authRepository.findUsersByCreator(unitManagerId, 'user');
+      const users = await this.authRepository.findUsersByCreator(unitManagerId);
+      console.log(users)
       if (!users) {
         throw createHttpError(404, "No users found");
       }
+      return users.map(user => {
+        const { password, ...userWithoutPassword } = user.toObject();
+        return userWithoutPassword;
+      });
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async getUnitManagerCreatedUsers(unitManagerId: string) {
+    try {
+      const users = await this.authRepository.getUnitManagerCreatedUsers(unitManagerId);
+      
       return users.map(user => {
         const { password, ...userWithoutPassword } = user.toObject();
         return userWithoutPassword;
@@ -195,9 +210,9 @@ export class AuthService {
     }
   }
 
-  async getAllAdmins() {
+  async getAllAdmins(id:string) {
     try {
-      const admins = await this.authRepository.getAllAdmins();
+      const admins = await this.authRepository.getAllAdmins(id);
       return admins.map(admin => {
         const { password, ...adminWithoutPassword } = admin;
         return adminWithoutPassword;
@@ -259,14 +274,21 @@ export class AuthService {
     }
   }
 
-  async getAllUnitManagers() {
+  async getAllUnitManagers(Id: string) {
     try {
-      const unitManagers = await this.authRepository.getAllUnitManagers();
+      const unitManagers = await this.authRepository.getAllUnitManagers(Id);
       
       return unitManagers.map(manager => {
-        const managerObj = manager.toObject();
-        const { password, ...managerWithoutSensitiveInfo } = managerObj;
-        return managerWithoutSensitiveInfo;
+        // Check if manager is a Mongoose document
+        if (manager.toObject) {
+          const managerObj = manager.toObject();
+          const { password, ...managerWithoutSensitiveInfo } = managerObj;
+          return managerWithoutSensitiveInfo;
+        } else {
+          // If it's a plain object, destructure directly
+          const { password, ...managerWithoutSensitiveInfo } = manager;
+          return managerWithoutSensitiveInfo;
+        }
       });
     } catch (error) {
       throw error;
