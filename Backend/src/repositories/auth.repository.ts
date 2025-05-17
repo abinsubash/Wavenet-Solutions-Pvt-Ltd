@@ -1,0 +1,198 @@
+import { UserModel } from '../model/user.model';
+import { Types, Document } from 'mongoose';
+import { IUser, UserRole } from '../types/user.types';
+
+type UserData = {
+  username: string;
+  email: string;
+  password: string;
+  role: UserRole;
+  isBlocked: boolean;
+};
+
+export class AuthRepository {
+  async create(userData: UserData) {
+    const user = await UserModel.create(userData);
+    if (!user) throw new Error('Failed to create user');
+    return user.toObject();
+  }
+
+  async findUserByEmail(email: string) {
+    const user = await UserModel.findOne({ email });
+    if (!user) return null;
+    return user.toObject();
+  }
+
+  async checkBlockStatus(email: string) {
+    const user = await UserModel.findOne({ email });
+    return user?.isBlocked || false;
+  }
+
+  async getAllUsers() {
+    const users = await UserModel.find({ role: { $ne: 'superAdmin' } });
+    return users.map(user => user.toObject());
+  }
+
+  async findByEmail(email: string) {
+    const user = await UserModel.findOne({ email });
+    return user ? user.toObject() : null;
+  }
+
+  async findByEmailAndRole(email: string, role?: string) {
+    if (!role) return null;
+
+    const user = await UserModel.findOne({
+      email,
+      role: { $regex: new RegExp(role, 'i') }
+    });
+
+    return user ? user.toObject() : null;
+  }
+
+  async createUnitManager(userData: {
+    username: string;
+    email: string;
+    password: string;
+    role: UserRole;
+    createdBy: string;
+  }) {
+    try {
+      const unitManager = new UserModel({
+        ...userData,
+        isBlocked: false // Remove redundant role assignment since it's already in userData
+      });
+      return await unitManager.save();
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async findById(userId: string): Promise<IUser | null> {
+    try {
+      return await UserModel.findById(userId) as IUser | null;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async save(user: IUser): Promise<IUser> {
+    try {
+      return await user.save() as IUser;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async delete(userId: string) {
+    try {
+      return await UserModel.findByIdAndDelete(userId);
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async getAllAdminCreated(adminId: string) {
+    try {
+      const users = await UserModel.find({ 
+        createdBy: adminId,
+      }).populate('createdBy', 'username email');
+      
+      return users.map(user => user.toObject());
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async findUsersByCreator(creatorId: string, role: UserRole) {
+    return await UserModel.find({ 
+      createdBy: creatorId,
+      role: role 
+    }).sort({ createdAt: -1 });
+  }
+
+  async getAllAdmins() {
+    try {
+      const admins = await UserModel.find({ 
+        role: 'admin',
+        isBlocked: false 
+      }).select('-password');
+      return admins.map(admin => admin.toObject());
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async addToGroupedWith(userId: string, adminId: string) {
+    try {
+      await UserModel.findByIdAndUpdate(
+        userId,
+        { 
+          $addToSet: { groupedWith: adminId } 
+        },
+        { new: true }
+      );
+      return true;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async getGroupedAdmins(userId: string) {
+    try {
+      const user = await UserModel.findById(userId)
+        .populate('groupedWith', '-password -refreshToken -createdAt -updatedAt')
+        .select('groupedWith');
+
+      if (!user) {
+        throw new Error('User not found');
+      }
+
+      return user.groupedWith || [];
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async removeFromGroupedWith(userId: string, adminId: string) {
+    try {
+      await UserModel.findByIdAndUpdate(
+        userId,
+        { 
+          $pull: { groupedWith: adminId } 
+        },
+        { new: true }
+      );
+      return true;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async getAllUnitManagers() {
+    try {
+      const unitManagers =await UserModel.find({ 
+        role: 'unitManager',
+        isBlocked: false 
+      }).select('-password');
+      console.log('kittineee')
+      console.log(unitManagers)
+      return unitManagers;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async getGroupedUsers(userId: string) {
+    try {
+      // Convert string IDs to ObjectIds
+      const users = await UserModel.find({
+        createdBy: userId,
+      }).select('-password');
+      console.log('this is usersBYkkkkkkkkkkkkkkkkk',users)
+      return users;
+
+    } catch (error) {
+      throw error;
+    }
+  }
+}
