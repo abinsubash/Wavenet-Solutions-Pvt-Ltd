@@ -9,7 +9,7 @@ const PORT = process.env.PORT || 5000;
 
 // Update CORS configuration
 app.use(cors({
-  origin: 'http://localhost:5173', // Specific origin instead of wildcard
+  origin: 'https://wavenet-solutions.vercel.app', // Specific origin instead of wildcard
   credentials: true,
   methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Refresh-Token']
