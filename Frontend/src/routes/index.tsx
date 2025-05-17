@@ -8,6 +8,7 @@ import UserHome from '../pages/user/UserHome';
 import AuthGuard from './ProtectedRoute';
 import GroupedUser from '../pages/unitManager/GroupedUser';
 import GroupedAdmin from '../pages/admin/GroupedAdmin';
+import ManageUser from '../pages/admin/ManageUser';
 
 export const router = createBrowserRouter([
   {
@@ -60,6 +61,10 @@ export const router = createBrowserRouter([
           {
             path: 'grouped/:id',
             element: <GroupedAdmin />
+          },
+          {
+            path: 'manage-users/:id',
+            element: <ManageUser />
           }
         ]
       }

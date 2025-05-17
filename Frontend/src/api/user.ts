@@ -86,7 +86,7 @@ export const getAdmins = async () => {
 export const addToGroup = async (userId: string) => {
   try {
     const api = createAuthenticatedRequest();
-    const response = await api.post(`/api/admin/addToGroup/${userId}`);
+    const response = await api.post(`/admin/addToGroup/${userId}`);
     return response.data;
   } catch (error) {
     throw error;
@@ -105,7 +105,7 @@ export const getGroupedAdmins = async () => {
 export const removeFromGroup = async (userId: string) => {
   try {
     const api = createAuthenticatedRequest();
-    const response = await api.delete(`/api/admin/group/${userId}`);
+    const response = await api.delete(`/admin/group/${userId}`);
     return response.data;
   } catch (error) {
     throw error;
@@ -144,3 +144,14 @@ export const getGroupedUsers = async (userId: string) => {
 
 
 
+export const getUsers = async(userId:string)=>{
+  try{
+
+    const api = createAuthenticatedRequest()
+    const response = await api.get(`/unit-Manager/${userId}`)
+    return response.data
+
+  }catch(error){
+    throw error
+  }
+}

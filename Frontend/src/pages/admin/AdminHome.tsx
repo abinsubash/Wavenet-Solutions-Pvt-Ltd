@@ -9,7 +9,7 @@ import { useAppDispatch, useAppSelector } from "../../hooks/hooks";
 import { logout } from "../../store/auth.slice";
 import toast from "react-hot-toast";
 import { Users, FileText, Group, LogOut, Plus, Eye } from "lucide-react";
-import { getAdminCreatedUsers, deleteUser, blockUser, getGroupedAdmins, removeFromGroup } from "../../api/user";
+import { getAdminCreatedUsers, deleteUser, blockUser, getGroupedAdmins, removeFromGroup, getGroupedUsers } from "../../api/user";
 import { getInvoices, deleteInvoice, blockInvoice } from '../../api/invoice';
 import type { User } from "../../api/user";
 import type { Admin } from '../../types/user.types';
@@ -85,8 +85,11 @@ const AdminHome = () => {
   };
 
   const handleView = (id: string) => {
-    // Navigate to view page or open view modal
-    console.log("View user with id:", id);
+    try {
+      navigate(`/admin/manage-users/${id}`);
+    } catch (error) {
+      toast.error('Navigation failed');
+    }
   };
 
   const handleDelete = async (userId: string) => {
